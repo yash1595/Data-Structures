@@ -5,9 +5,6 @@
 #include <syslog.h>
 #include <time.h>
 #define function_count	6
-#ifndef(__linux__)
-#define os "LINUX"
-#endif
 
 static int i=0;
 static int global_num=0;
@@ -23,7 +20,6 @@ errtype Del(const char*);
 errtype Free(const char*);
 errtype Disp(const char*);
 errtype Exit(const char*);
-void logfunc(const char*);
 
 typedef enum{CLEAR,SET}flag;
 flag allocated_flag=CLEAR;
@@ -39,14 +35,13 @@ FILE *fp;
 time_t rawtime;
 struct tm * timeinfo;
 
-printf("Running on: %s\n",os);
+
 int main(void)
 {	
 	fp=fopen("/home/ubuntu/Documents/cunit/Project_2/src2/out.txt","w");
 	time ( &rawtime );
   	timeinfo = localtime ( &rawtime );
-	fprintf (fp,"[Current local time and date: %s]", asctime (timeinfo) );
-	//openlog("main2.c", 0, LOG_USER);	
+	fprintf (fp,"[Current local time and date: %s]-------------------------------", asctime (timeinfo) );	
 	errtype status=Success;
 	f_ptr[0]=Allocate;
 	f_ptr[1]=Add;
@@ -60,26 +55,14 @@ int main(void)
 	{
 		fgets(inputstr,100,stdin);
 		fprintf(fp,"%s\n",inputstr);
-		//fclose(fp);
 		for(i=0;i<function_count;i++)
 		{
 			if(strcmp((char*)funct[i],(char*)inputstr)==0)
 				{	printf("%s",names[i]);
-					/*time ( &rawtime );
-  					timeinfo = localtime ( &rawtime );
-					fprintf (fp,"[Current local time and date: %s]", asctime (timeinfo) );
-					fprintf(fp,"%s--Function\n",names[i]);
-					*/
 					logfunc(names[i]);
 					status=(*f_ptr[i])(fgets(str,100,stdin));
 					printf("%s\n",errors[status]);
-					/*time ( &rawtime );
-  					timeinfo = localtime ( &rawtime );
-					fprintf (fp,"[Current local time and date: %s]", asctime (timeinfo) );
-					fprintf(fp,"%s--Status\n",errors[status]);
-					*/
 					logfunc(errors[status]);
-					//syslog(LOG_INFO, "%s",errors[status]);
 				}
 		}
 	  
@@ -94,7 +77,8 @@ errtype Allocate(const char* loc)
 	int num=atoi(loc);
 	if(num<0)status=OutofBounds;
 	if(status==Success)
-	{	fprintf(fp,"%d\n",num);
+	{	
+		fprintf(fp,"%d\n",num);
 		printf("Locations:%d\n",num);
 		memory = (int*)malloc(num*sizeof(char));
 		if(memory==NULL)status=FailedToAlloc;
@@ -192,10 +176,10 @@ errtype Exit(const char* loc)
 	return status;
 }
 
-void logfunc(const char* string)
+void logfunc(char* string)
 {	
 	time ( &rawtime );
 	timeinfo = localtime ( &rawtime );
-	fprintf (fp,"%s-------------------------------\n", asctime (timeinfo));
-	fprintf(fp,"%s\n",string);
+	fprintf (fp,"[Current local time and date: %s]--------------------------", asctime (timeinfo));
+	fprintf(fp,"%s\n",*string);
 }
